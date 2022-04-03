@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-03 10:55:08"
+	"lastUpdated": "2022-04-03 11:26:11"
 }
 
 /*
@@ -231,6 +231,7 @@ function detailScrape(doc,url)
 	pageNum = ZU.xpath(doc,'//div[@class="pageNum list"]//div[@class = "itemUrl"]')[0].innerText;
 	// Z.debug(pageNum);
 	newItem.pages = pageNum;
+	newItem.url = url;
 	// var creators = [];
 	// for (var i = 0, n = creators.length; i < n; i++) {
 	// 	var creator = creators[i];
@@ -744,6 +745,56 @@ var testCases = [
 						"tag": "生活质量"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://d.wanfangdata.com.cn/periodical/ChlQZXJpb2RpY2FsQ0hJTmV3UzIwMjIwMzIyEg1jbGRiMjAyMjAyMDA5GghkdmdidGcyMw%3D%3D",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "缺陷偶极子调控铅基钙钛矿压电陶瓷性能的研究进展",
+				"creators": [
+					{
+						"lastName": "唐明响",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "陈良",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "祁核",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "孙胜东",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "刘辉",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "陈骏",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-03-07",
+				"DOI": "10.11896/cldb.20090329",
+				"abstractNote": "摘要： 压电陶瓷作为一种可以实现机械能和电能之间相互转换的功能陶瓷材料,广泛应用于传感器、制动器、超声换能器、医学超声成像及发动机燃油喷射系统等领域.在压电陶瓷中,元素掺杂可以有效调控陶瓷的电学性能,伴随掺杂而产生的缺陷偶极子对压电陶瓷性能有着显著而独特的影响.因此研究缺陷偶极子对压电陶瓷性能的调控机理,有助于理解压电陶瓷诸多物理现象的内在成因,譬如老化、疲劳等.通... 查看全部>>",
+				"issue": "2",
+				"language": "ZH-CN",
+				"libraryCatalog": "Wanfang Data-my",
+				"pages": "62-67",
+				"publicationTitle": "材料导报",
+				"url": "https://d.wanfangdata.com.cn/periodical/ChlQZXJpb2RpY2FsQ0hJTmV3UzIwMjIwMzIyEg1jbGRiMjAyMjAyMDA5GghkdmdidGcyMw%3D%3D",
+				"volume": "36",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
