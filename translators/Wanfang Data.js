@@ -2,14 +2,14 @@
 	"translatorID": "eb876bd2-644c-458e-8d05-bf54b10176f3",
 	"label": "Wanfang Data",
 	"creator": "Ace Strong <acestrong@gmail.com>",
-	"target": "^https?://[a-z]+\\.wanfangdata\\.com\\.cn",
+	"target": "test^https?://[a-z]+\\.wanfangdata\\.com\\.cn",
 	"minVersion": "2.0rc1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-16 07:36:14"
+	"lastUpdated": "2022-04-03 10:41:21"
 }
 
 /*
@@ -109,48 +109,63 @@ var typeFieldMapper = {
 
 
 function getRefworksByID(ids, next) {
+	Z.debug("<---------getgetRefworkworkByID---------->")
 	if (!ids.length) return;
+	// Z.debug("<---------getgetRefworkworkByID----"+ids.shift())
 	var { dbname, filename, url} = ids.shift();
 	var headers = {
 		'Content-Type': 'application/json;charset=UTF-8'
 	};
-	var postData = JSON.stringify({'Id':filename});
 	Z.debug(dbname, filename, url);
+	var postData = JSON.stringify({'Id':filename});
+	
 	var searchType = {
 		journalArticle: "Periodical",
 		thesis: "Thesis",
 		conferencePaper: "Conference",
 		patent: "Patent"
 	};
+
+	//问题出在了这里  HTTP POST https://d.wanfangdata.com.cn/Detail/Periodical/ failed with status code 0
+	
+	//根据解析出来的具体页面拼接的网址请求详情页
 	var postUrl = "https://d.wanfangdata.com.cn/Detail/" + searchType[dbname] + "/";
-	ZU.doPost(postUrl, postData, 
-		function(text) {
+	Z.debug("dopost")
+	ZU.doPost(postUrl, postData, function(text) 
+	{
 			detail = JSON.parse(text).detail[0];
 			detail = detail[Object.keys(detail)[0]];
 			// Z.debug(detail);
 			detail.url = url;
 			detail.dbname = dbname;
 			next(detail);
-			if (ids.length) {
+			if (ids.length) 
+			{
 				getRefworksByID(ids, next);
 			}
-		},
+	},
 		headers=headers
 	);
+	
 	
 }
 
 
 function scrape(ids, itemInfo) {
-	Z.debug("---------------WanFang Data 20220316---------------");
-	getRefworksByID(ids, function(detail) {
-		// Z.debug(detail);
+	Z.debug("<---------------scrape--------------->");
+	try
+	{
+	getRefworksByID(ids, function(detail) 
+	{
+		Z.debug("getRefworksByID--function(detail)");
 		var dbname = detail.dbname;
 		var newItem = new Zotero.Item();
 		var matcher = typeFieldMapper[dbname];
+		Z.debug(matcher)
 		newItem.itemType = dbname;
 		newItem.title = detail.Title[0];
 		newItem.abstractNote = detail.Abstract[0];
+		Z.debug(newItem);
 		detail.Language && detail.Language != 'chi' ? newItem.language=detail.Language : newItem.language = 'zh_CN';
 		if (detail.FulltextPath && detail.FulltextPath.startsWith("http")) { // add full text path in note
 			var note = `文章全文链接<br><a href="${detail.FulltextPath}">${detail.FulltextPath}</a>`;
@@ -191,6 +206,11 @@ function scrape(ids, itemInfo) {
 		}
 		newItem.complete();
 	});
+	}
+	finally
+	{
+	return;
+	}
 }
 
 
@@ -231,6 +251,7 @@ function addCreators(field, detail) {
 
 // Get file name and database name.
 function getIDFromURL(url) {
+	Z.debug("<------getIDFromURL--->");
 	if (!url) return false;
 	var tmp, dbname, filename;
 	if (url.includes("Detail?id")) {  // For medical
@@ -258,13 +279,16 @@ function getIDFromURL(url) {
 
 // Get ID from page
 function getIDFromPage(doc, url) {
+	Z.debug("<------getIDFromPage------>");
 	var ele = doc.querySelector("a.download") || doc.querySelector("span.title-id-hidden");
 	if (ele === null) return false;
 	var hiddenId = ele.getAttribute('href') || ele.innerText;
 	var tmp = hiddenId.match(/(\w+)_(\w+)/);
 	if (tmp === null) return false;
 	return {dbname: getTypeFromDBName(tmp[1]),
-		filename: tmp[2], url: url || `https://d.wanfangdata.com.cn/${hiddenId.replace("_", "/")}`
+		filename: tmp[2], 
+		url: url || `${hiddenId}`
+		// url: url || `https://d.wanfangdata.com.cn/${hiddenId.replace("_", "/")}`
 	}
 
 }
@@ -295,8 +319,19 @@ function getTypeFromDBName(db) {
 
 
 function detectWeb(doc, url) {
-	if (url.includes("?q=") || url.includes("/advanced-search/")) return "multiple";
+	if (url.includes("?q=") || url.includes("/advanced-search/")) 
+	{
+		// Z.debug("multiple");
+		return "multiple";
+	}
 	var id = getIDFromPage(doc) || getIDFromURL(url);
+	/*
+		id= {
+			 "dbname": "journalArticle"
+			 "filename": "gncl202201008"
+			 "url": "https://oss.wanfangdata.com.cn/file/download/perio_gncl202201008.aspx"
+		 	}
+	*/
 	Z.debug(id);
 	if (id) {
 		return id.dbname;
@@ -337,8 +372,9 @@ function doWeb(doc, url) {
 			}
 			scrape(ids, itemInfo)
 		});
-	} else {
-		var id = getIDFromPage(doc) || getIDFromURL(url);
+	} 
+	else {
+		var id = getIDFromPage(doc,url) || getIDFromURL(url);
 		scrape([id], doc);
 	}
 }
